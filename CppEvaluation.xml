@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.15.0"/>
+    <errors>
+        <error id="missingInclude" severity="information" msg="Include file: &amp;quot;LinSM.h&amp;quot; not found." verbose="Include file: &amp;quot;LinSM.h&amp;quot; not found.">
+            <location file="LinSM.c" line="13"/>
+        </error>
+    </errors>
+</results>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.15.0"/>
+    <errors>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;stdint.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;stdint.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\Platform_Types.h" line="13"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="src/LinSM.c">
+            <location file="src\LinSM.c" line="0"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;stdarg.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;stdarg.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\fff.h" line="29"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;string.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;string.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\fff.h" line="30"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;ctype.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;ctype.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="275"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;stdarg.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;stdarg.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="276"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;stdio.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;stdio.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="277"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;stdlib.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;stdlib.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="278"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;string.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;string.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="279"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;setjmp.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;setjmp.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="280"/>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &amp;#039;line_beg&amp;#039; can be declared as pointer to const" verbose="Variable &amp;#039;line_beg&amp;#039; can be declared as pointer to const" cwe="398" file0="tests/UT_LinSM.c">
+            <location file="include\acutest.h" line="750"/>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &amp;#039;assignment&amp;#039; can be declared as pointer to const" verbose="Variable &amp;#039;assignment&amp;#039; can be declared as pointer to const" cwe="398" file0="tests/UT_LinSM.c">
+            <location file="include\acutest.h" line="1362"/>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &amp;#039;details&amp;#039; can be declared as pointer to const" verbose="Variable &amp;#039;details&amp;#039; can be declared as pointer to const" cwe="398" file0="tests/UT_LinSM.c">
+            <location file="include\acutest.h" line="1766"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;errno.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;errno.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="284"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;libgen.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;libgen.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="285"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;unistd.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;unistd.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="286"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;sys/types.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;sys/types.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="287"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;sys/wait.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;sys/wait.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="288"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;signal.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;signal.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="289"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;time.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;time.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="290"/>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &amp;#039;suite_name&amp;#039; can be declared as pointer to const" verbose="Variable &amp;#039;suite_name&amp;#039; can be declared as pointer to const" cwe="398" file0="tests/UT_LinSM.c">
+            <location file="include\acutest.h" line="1754"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;windows.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;windows.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="305"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;io.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;io.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="306"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;fcntl.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;fcntl.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="299"/>
+        </error>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;sys/stat.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;sys/stat.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="include\acutest.h" line="300"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="tests/UT_LinSM.c">
+            <location file="tests\UT_LinSM.c" line="0"/>
+        </error>
+    </errors>
+</results>

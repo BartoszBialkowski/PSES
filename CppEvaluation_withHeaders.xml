@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.15.0"/>
+    <errors>
+        <error id="missingIncludeSystem" severity="information" msg="Include file: &amp;lt;stdint.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results." verbose="Include file: &amp;lt;stdint.h&amp;gt; not found. Please note: Cppcheck does not need standard library headers to get proper results.">
+            <location file="Platform_Types.h" line="13"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="LinSM.c">
+            <location file="LinSM.c" line="0"/>
+        </error>
+    </errors>
+</results>

@@ -1,0 +1,155 @@
+\doxysection{src/\+Lin\+SM.c File Reference}
+\hypertarget{_lin_s_m_8c}{}\label{_lin_s_m_8c}\index{src/LinSM.c@{src/LinSM.c}}
+
+
+Biblioteka Lin\+SM -\/ implementacja.  
+
+
+{\ttfamily \#include "{}../include/\+Lin\+SM.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{_lin_s_m_8c_a78c5a10559d32323fabcb7249b774635}{Lin\+SM\+\_\+\+Init}} (const Lin\+SM\+\_\+\+Config\+Type \texorpdfstring{$\ast$}{*}Config\+Ptr)
+\begin{DoxyCompactList}\small\item\em 8.\+3.\+1 Lin\+SM\+\_\+\+Init \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00155\mbox{]} \end{DoxyCompactList}\item 
+Std\+\_\+\+Return\+Type \mbox{\hyperlink{_lin_s_m_8c_afd5319f02a5c746b51bf009582d8a2f1}{Lin\+SM\+\_\+\+Schedule\+Request}} (Network\+Handle\+Type channel, Lin\+If\+\_\+\+Sch\+Handle\+Type schedule)
+\begin{DoxyCompactList}\small\item\em 8.\+3.\+2 Lin\+SM\+\_\+\+Schedule\+Request \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_lin_s_m_8c_aecb3d590c61297880bbbeea8914f9105}{Lin\+SM\+\_\+\+Get\+Version\+Info}} (Std\+\_\+\+Version\+Info\+Type \texorpdfstring{$\ast$}{*}versioninfo)
+\begin{DoxyCompactList}\small\item\em 8.\+3.\+3 Lin\+SM\+\_\+\+Get\+Version\+Info \end{DoxyCompactList}\item 
+Std\+\_\+\+Return\+Type \mbox{\hyperlink{_lin_s_m_8c_aaf98a15d57b9d0b61089e37544870b84}{Lin\+SM\+\_\+\+Get\+Current\+Com\+Mode}} (Network\+Handle\+Type channel, Com\+M\+\_\+\+Mode\+Type \texorpdfstring{$\ast$}{*}req\+Com\+Mode)
+\begin{DoxyCompactList}\small\item\em 8.\+3.\+4 Lin\+SM\+\_\+\+Get\+Current\+Com\+Mode \end{DoxyCompactList}\item 
+Std\+\_\+\+Return\+Type \mbox{\hyperlink{_lin_s_m_8c_a2de83d0eef4d1bcf43bc32b54994be97}{Lin\+SM\+\_\+\+Request\+Com\+Mode}} (Network\+Handle\+Type channel, Com\+M\+\_\+\+Mode\+Type req\+Com\+Mode)
+\begin{DoxyCompactList}\small\item\em 8.\+3.\+5 Lin\+SM\+\_\+\+Request\+Com\+Mode \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_lin_s_m_8c_a1184abc292c3affe439a033a990d0904}{Lin\+SM\+\_\+\+Main\+Function}} (void)
+\begin{DoxyCompactList}\small\item\em 8.\+4.\+1 Lin\+SM\+\_\+\+Main\+Function \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_lin_s_m_8c_a0c39ff5cb583ae3092bd3e1ee5eacae4}{Lin\+SM\+\_\+\+Schedule\+Request\+Confirmation}} (Network\+Handle\+Type channel, const Lin\+If\+\_\+\+Sch\+Handle\+Type \texorpdfstring{$\ast$}{*}schedule)
+\begin{DoxyCompactList}\small\item\em 8.\+5.\+1 Lin\+SM\+\_\+\+Schedule\+Request\+Confirmation \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_lin_s_m_8c_adf19515de7ce5f6eaf378389a6d68485}{Lin\+SM\+\_\+\+Goto\+Sleep\+Confirmation}} (Network\+Handle\+Type channel, boolean success)
+\begin{DoxyCompactList}\small\item\em 8.\+5.\+3 Lin\+SM\+\_\+\+Goto\+Sleep\+Confirmation \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_lin_s_m_8c_ad20a411b583d51e422a0640eaa00a713}{Lin\+SM\+\_\+\+Wakeup\+Confirmation}} (Network\+Handle\+Type channel, boolean success)
+\begin{DoxyCompactList}\small\item\em 8.\+5.\+4 Lin\+SM\+\_\+\+Wakeup\+Confirmation \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{_lin_s_m_8c_a2050457b273e8132024745d7bbc21638}\label{_lin_s_m_8c_a2050457b273e8132024745d7bbc21638} 
+Lin\+SM\+\_\+\+Channel\+Timers {\bfseries Lin\+SM\+\_\+\+Timer} \mbox{[}LINSM\+\_\+\+MAX\+\_\+\+CHANNELS\mbox{]}
+\item 
+\Hypertarget{_lin_s_m_8c_abc6da9c496c2c4c7553831da3e108640}\label{_lin_s_m_8c_abc6da9c496c2c4c7553831da3e108640} 
+Lin\+SM\+\_\+\+Main\+State\+Type {\bfseries Lin\+SM\+\_\+\+Main\+State} = LINSM\+\_\+\+UNINIT
+\item 
+\Hypertarget{_lin_s_m_8c_a0250ce8ebfa41d2b5e9f65cfd5da88e3}\label{_lin_s_m_8c_a0250ce8ebfa41d2b5e9f65cfd5da88e3} 
+Lin\+SM\+\_\+\+Mode\+Type {\bfseries Lin\+SM\+\_\+\+Mode} = LINSM\+\_\+\+NO\+\_\+\+COM
+\item 
+\Hypertarget{_lin_s_m_8c_a536a3e70f0a2eeb161cbd881b5f169e6}\label{_lin_s_m_8c_a536a3e70f0a2eeb161cbd881b5f169e6} 
+Lin\+SM\+\_\+\+Sub\+State\+Type {\bfseries Lin\+SM\+\_\+\+Sub\+State} = LINSM\+\_\+\+RUN\+\_\+\+COMMUNICATION
+\item 
+\Hypertarget{_lin_s_m_8c_a3e981fe3377bdb4d263f928140e04e23}\label{_lin_s_m_8c_a3e981fe3377bdb4d263f928140e04e23} 
+const Lin\+SM\+\_\+\+Config\+Type {\bfseries Lin\+SM\+\_\+\+Config}
+\item 
+\Hypertarget{_lin_s_m_8c_abd3db4b9439f6dcb26ecd3770fdda578}\label{_lin_s_m_8c_abd3db4b9439f6dcb26ecd3770fdda578} 
+const Lin\+SM\+\_\+\+Config\+Type {\bfseries Lin\+SM\+\_\+\+Config\+\_\+test}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Biblioteka Lin\+SM -\/ implementacja. 
+
+===================================================================================================================\texorpdfstring{$\ast$}{*}\textbackslash{}
+
+Implementacja funkcjonalności
+
+\texorpdfstring{$\ast$}{*}==================================================================================================================== 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{_lin_s_m_8c_aaf98a15d57b9d0b61089e37544870b84}\index{LinSM.c@{LinSM.c}!LinSM\_GetCurrentComMode@{LinSM\_GetCurrentComMode}}
+\index{LinSM\_GetCurrentComMode@{LinSM\_GetCurrentComMode}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_GetCurrentComMode()}{LinSM\_GetCurrentComMode()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_aaf98a15d57b9d0b61089e37544870b84} 
+Std\+\_\+\+Return\+Type Lin\+SM\+\_\+\+Get\+Current\+Com\+Mode (\begin{DoxyParamCaption}\item[{Network\+Handle\+Type}]{channel}{, }\item[{Com\+M\+\_\+\+Mode\+Type \texorpdfstring{$\ast$}{*}}]{req\+Com\+Mode}{}\end{DoxyParamCaption})}
+
+
+
+8.\+3.\+4 Lin\+SM\+\_\+\+Get\+Current\+Com\+Mode 
+
+Funkcja sprawdzająca aktualny tryb komunikacji. Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00122\mbox{]} \Hypertarget{_lin_s_m_8c_aecb3d590c61297880bbbeea8914f9105}\index{LinSM.c@{LinSM.c}!LinSM\_GetVersionInfo@{LinSM\_GetVersionInfo}}
+\index{LinSM\_GetVersionInfo@{LinSM\_GetVersionInfo}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_GetVersionInfo()}{LinSM\_GetVersionInfo()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_aecb3d590c61297880bbbeea8914f9105} 
+void Lin\+SM\+\_\+\+Get\+Version\+Info (\begin{DoxyParamCaption}\item[{Std\+\_\+\+Version\+Info\+Type \texorpdfstring{$\ast$}{*}}]{versioninfo}{}\end{DoxyParamCaption})}
+
+
+
+8.\+3.\+3 Lin\+SM\+\_\+\+Get\+Version\+Info 
+
+Pobranie informacji o aktualnej wersji Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00117\mbox{]} \Hypertarget{_lin_s_m_8c_adf19515de7ce5f6eaf378389a6d68485}\index{LinSM.c@{LinSM.c}!LinSM\_GotoSleepConfirmation@{LinSM\_GotoSleepConfirmation}}
+\index{LinSM\_GotoSleepConfirmation@{LinSM\_GotoSleepConfirmation}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_GotoSleepConfirmation()}{LinSM\_GotoSleepConfirmation()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_adf19515de7ce5f6eaf378389a6d68485} 
+void Lin\+SM\+\_\+\+Goto\+Sleep\+Confirmation (\begin{DoxyParamCaption}\item[{Network\+Handle\+Type}]{channel}{, }\item[{boolean}]{success}{}\end{DoxyParamCaption})}
+
+
+
+8.\+5.\+3 Lin\+SM\+\_\+\+Goto\+Sleep\+Confirmation 
+
+Funkcja zwrotna wywoływana przez Lin\+If po wysłaniu polecenia goto sleep Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00135\mbox{]} \Hypertarget{_lin_s_m_8c_a78c5a10559d32323fabcb7249b774635}\index{LinSM.c@{LinSM.c}!LinSM\_Init@{LinSM\_Init}}
+\index{LinSM\_Init@{LinSM\_Init}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_Init()}{LinSM\_Init()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_a78c5a10559d32323fabcb7249b774635} 
+void Lin\+SM\+\_\+\+Init (\begin{DoxyParamCaption}\item[{const Lin\+SM\+\_\+\+Config\+Type \texorpdfstring{$\ast$}{*}}]{Config\+Ptr}{}\end{DoxyParamCaption})}
+
+
+
+8.\+3.\+1 Lin\+SM\+\_\+\+Init \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00155\mbox{]} 
+
+Inicjalizacja Lin\+SM. Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00155\mbox{]} \Hypertarget{_lin_s_m_8c_a1184abc292c3affe439a033a990d0904}\index{LinSM.c@{LinSM.c}!LinSM\_MainFunction@{LinSM\_MainFunction}}
+\index{LinSM\_MainFunction@{LinSM\_MainFunction}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_MainFunction()}{LinSM\_MainFunction()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_a1184abc292c3affe439a033a990d0904} 
+void Lin\+SM\+\_\+\+Main\+Function (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+8.\+4.\+1 Lin\+SM\+\_\+\+Main\+Function 
+
+Funkcja okresowa uruchamiająca timery różnych limitów czasu żądań Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00156\mbox{]} \Hypertarget{_lin_s_m_8c_a2de83d0eef4d1bcf43bc32b54994be97}\index{LinSM.c@{LinSM.c}!LinSM\_RequestComMode@{LinSM\_RequestComMode}}
+\index{LinSM\_RequestComMode@{LinSM\_RequestComMode}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_RequestComMode()}{LinSM\_RequestComMode()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_a2de83d0eef4d1bcf43bc32b54994be97} 
+Std\+\_\+\+Return\+Type Lin\+SM\+\_\+\+Request\+Com\+Mode (\begin{DoxyParamCaption}\item[{Network\+Handle\+Type}]{channel}{, }\item[{Com\+M\+\_\+\+Mode\+Type}]{req\+Com\+Mode}{}\end{DoxyParamCaption})}
+
+
+
+8.\+3.\+5 Lin\+SM\+\_\+\+Request\+Com\+Mode 
+
+Żądanie trybu komunikacji. Przełączenie trybu nie nastąpi natychmiastowo. Lin\+SM powiadomi funkcje wywołującą, kiedy nastąpi przejście trybu.
+
+Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00126\mbox{]} \Hypertarget{_lin_s_m_8c_afd5319f02a5c746b51bf009582d8a2f1}\index{LinSM.c@{LinSM.c}!LinSM\_ScheduleRequest@{LinSM\_ScheduleRequest}}
+\index{LinSM\_ScheduleRequest@{LinSM\_ScheduleRequest}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_ScheduleRequest()}{LinSM\_ScheduleRequest()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_afd5319f02a5c746b51bf009582d8a2f1} 
+Std\+\_\+\+Return\+Type Lin\+SM\+\_\+\+Schedule\+Request (\begin{DoxyParamCaption}\item[{Network\+Handle\+Type}]{channel}{, }\item[{Lin\+If\+\_\+\+Sch\+Handle\+Type}]{schedule}{}\end{DoxyParamCaption})}
+
+
+
+8.\+3.\+2 Lin\+SM\+\_\+\+Schedule\+Request 
+
+Wyższa warstwa żąda zmiany tabeli harmonogramu w jednej sieci LIN. Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00113\mbox{]} \Hypertarget{_lin_s_m_8c_a0c39ff5cb583ae3092bd3e1ee5eacae4}\index{LinSM.c@{LinSM.c}!LinSM\_ScheduleRequestConfirmation@{LinSM\_ScheduleRequestConfirmation}}
+\index{LinSM\_ScheduleRequestConfirmation@{LinSM\_ScheduleRequestConfirmation}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_ScheduleRequestConfirmation()}{LinSM\_ScheduleRequestConfirmation()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_a0c39ff5cb583ae3092bd3e1ee5eacae4} 
+void Lin\+SM\+\_\+\+Schedule\+Request\+Confirmation (\begin{DoxyParamCaption}\item[{Network\+Handle\+Type}]{channel}{, }\item[{const Lin\+If\+\_\+\+Sch\+Handle\+Type \texorpdfstring{$\ast$}{*}}]{schedule}{}\end{DoxyParamCaption})}
+
+
+
+8.\+5.\+1 Lin\+SM\+\_\+\+Schedule\+Request\+Confirmation 
+
+Funkcja zwrotna wywoływana przez Lin\+If, gdy nowa tabela harmonogramu jest aktywna Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00129\mbox{]} \Hypertarget{_lin_s_m_8c_ad20a411b583d51e422a0640eaa00a713}\index{LinSM.c@{LinSM.c}!LinSM\_WakeupConfirmation@{LinSM\_WakeupConfirmation}}
+\index{LinSM\_WakeupConfirmation@{LinSM\_WakeupConfirmation}!LinSM.c@{LinSM.c}}
+\doxysubsubsection{\texorpdfstring{LinSM\_WakeupConfirmation()}{LinSM\_WakeupConfirmation()}}
+{\footnotesize\ttfamily \label{_lin_s_m_8c_ad20a411b583d51e422a0640eaa00a713} 
+void Lin\+SM\+\_\+\+Wakeup\+Confirmation (\begin{DoxyParamCaption}\item[{Network\+Handle\+Type}]{channel}{, }\item[{boolean}]{success}{}\end{DoxyParamCaption})}
+
+
+
+8.\+5.\+4 Lin\+SM\+\_\+\+Wakeup\+Confirmation 
+
+Funkcja zwrotna wywoływana przez Lin\+If po wysłaniu sygnału wakeup Element projektu\+: \mbox{[}SWS\+\_\+\+Lin\+SM\+\_\+00132\mbox{]} 

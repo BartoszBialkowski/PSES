@@ -1,0 +1,535 @@
+        -:    0:Source:tests/UT_LinSM.c
+        -:    0:Graph:UT_LinSM.gcno
+        -:    0:Data:UT_LinSM.gcda
+        -:    0:Runs:19
+        -:    1://#include "LinSM.h"
+        -:    2:#include "fff.h"
+        -:    3:#include "acutest.h"
+        -:    4:#include "Std_Types.h"
+        -:    5:#include <stdio.h>
+        -:    6:#include "../src/LinSM.c"
+        -:    7:/* Definiowanie globalnych zmiennych FFF */
+        -:    8:DEFINE_FFF_GLOBALS;
+        -:    9:
+        -:   10:/* Mockowanie funkcji z LinIf */
+       2*:   11:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_ScheduleRequest, NetworkHandleType, LinIf_SchHandleType);
+------------------
+LinIf_ScheduleRequest_reset:
+    #####:   11:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_ScheduleRequest, NetworkHandleType, LinIf_SchHandleType);
+------------------
+LinIf_ScheduleRequest:
+       2*:   11:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_ScheduleRequest, NetworkHandleType, LinIf_SchHandleType);
+------------------
+      26*:   12:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_SetTrcvMode, NetworkHandleType, uint8);
+------------------
+LinIf_SetTrcvMode_reset:
+       19:   12:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_SetTrcvMode, NetworkHandleType, uint8);
+------------------
+LinIf_SetTrcvMode:
+       7*:   12:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_SetTrcvMode, NetworkHandleType, uint8);
+------------------
+      23*:   13:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_WakeUp, NetworkHandleType);
+------------------
+LinIf_WakeUp_reset:
+       19:   13:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_WakeUp, NetworkHandleType);
+------------------
+LinIf_WakeUp:
+       4*:   13:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_WakeUp, NetworkHandleType);
+------------------
+      21*:   14:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_GotoSleep, NetworkHandleType);
+------------------
+LinIf_GotoSleep_reset:
+       19:   14:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_GotoSleep, NetworkHandleType);
+------------------
+LinIf_GotoSleep:
+       2*:   14:FAKE_VALUE_FUNC(Std_ReturnType, LinIf_GotoSleep, NetworkHandleType);
+------------------
+        -:   15:
+        -:   16:/* Mockowanie funkcji z Det */
+      34*:   17:FAKE_VOID_FUNC(Det_ReportError, uint16, uint8, uint8, uint8);
+------------------
+Det_ReportError_reset:
+       19:   17:FAKE_VOID_FUNC(Det_ReportError, uint16, uint8, uint8, uint8);
+------------------
+Det_ReportError:
+      15*:   17:FAKE_VOID_FUNC(Det_ReportError, uint16, uint8, uint8, uint8);
+------------------
+        -:   18:
+        -:   19:/* Mockowanie funkcji z ComM */
+     469*:   20:FAKE_VOID_FUNC(ComM_BusSM_ModeIndication, NetworkHandleType, ComM_ModeType);
+------------------
+ComM_BusSM_ModeIndication_reset:
+       19:   20:FAKE_VOID_FUNC(ComM_BusSM_ModeIndication, NetworkHandleType, ComM_ModeType);
+------------------
+ComM_BusSM_ModeIndication:
+     450*:   20:FAKE_VOID_FUNC(ComM_BusSM_ModeIndication, NetworkHandleType, ComM_ModeType);
+------------------
+        -:   21:
+        -:   22:/* Mockowanie funkcji z BswM */
+     469*:   23:FAKE_VOID_FUNC(BswM_LinSM_CurrentState, NetworkHandleType, LinSM_ModeType);
+------------------
+BswM_LinSM_CurrentState_reset:
+       19:   23:FAKE_VOID_FUNC(BswM_LinSM_CurrentState, NetworkHandleType, LinSM_ModeType);
+------------------
+BswM_LinSM_CurrentState:
+     450*:   23:FAKE_VOID_FUNC(BswM_LinSM_CurrentState, NetworkHandleType, LinSM_ModeType);
+------------------
+      21*:   24:FAKE_VOID_FUNC(BswM_LinSM_CurrentSchedule, NetworkHandleType, LinIf_SchHandleType);
+------------------
+BswM_LinSM_CurrentSchedule_reset:
+       19:   24:FAKE_VOID_FUNC(BswM_LinSM_CurrentSchedule, NetworkHandleType, LinIf_SchHandleType);
+------------------
+BswM_LinSM_CurrentSchedule:
+       2*:   24:FAKE_VOID_FUNC(BswM_LinSM_CurrentSchedule, NetworkHandleType, LinIf_SchHandleType);
+------------------
+      24*:   25:FAKE_VOID_FUNC(BswM_LinSM_CurrentComMode, NetworkHandleType, ComM_ModeType);
+------------------
+BswM_LinSM_CurrentComMode_reset:
+       19:   25:FAKE_VOID_FUNC(BswM_LinSM_CurrentComMode, NetworkHandleType, ComM_ModeType);
+------------------
+BswM_LinSM_CurrentComMode:
+       5*:   25:FAKE_VOID_FUNC(BswM_LinSM_CurrentComMode, NetworkHandleType, ComM_ModeType);
+------------------
+      24*:   26:FAKE_VALUE_FUNC(Std_ReturnType, Det_ReportRuntimeError, uint16, uint8, uint8, uint8);
+------------------
+Det_ReportRuntimeError_reset:
+       19:   26:FAKE_VALUE_FUNC(Std_ReturnType, Det_ReportRuntimeError, uint16, uint8, uint8, uint8);
+------------------
+Det_ReportRuntimeError:
+       5*:   26:FAKE_VALUE_FUNC(Std_ReturnType, Det_ReportRuntimeError, uint16, uint8, uint8, uint8);
+------------------
+        -:   27:// Resetowanie wszystkich mocków
+       19:   28:void ResetAllMocks(void) {
+       19:   29:    RESET_FAKE(Det_ReportError);
+       19:   30:    RESET_FAKE(LinIf_SetTrcvMode);
+       19:   31:    RESET_FAKE(LinIf_WakeUp);
+       19:   32:	RESET_FAKE(LinIf_GotoSleep);
+       19:   33:	RESET_FAKE(ComM_BusSM_ModeIndication);
+       19:   34:	RESET_FAKE(BswM_LinSM_CurrentState);
+       19:   35:	RESET_FAKE(BswM_LinSM_CurrentSchedule);
+       19:   36:	RESET_FAKE(BswM_LinSM_CurrentComMode);
+       19:   37:	RESET_FAKE(Det_ReportRuntimeError);
+       19:   38:	FFF_RESET_HISTORY();
+       19:   39:}
+        -:   40:
+        -:   41:
+    #####:   42:Std_ReturnType LinIf_ScheduleRequest_custom(NetworkHandleType channel, LinIf_SchHandleType schedule) {
+    #####:   43:	uint8 call_count = 0;
+    #####:   44:    call_count++;
+    #####:   45:    if (call_count == 1) {
+    #####:   46:        return E_OK; // Pierwsze wywołanie zwraca E_OK
+        -:   47:    } else {
+    #####:   48:        return E_NOT_OK; // Drugie (i kolejne) wywołania zwracają E_NOT_OK
+        -:   49:    }
+        -:   50:}
+        -:   51:
+        1:   52:void test_LinSM_Init(void) {
+        1:   53:    ResetAllMocks();
+        -:   54:
+        -:   55:    /* Wywołanie funkcji z NULL jako parametrem */
+        1:   56:    LinSM_Init(NULL);
+        -:   57:
+        -:   58:    /* Sprawdzenie, czy zgłoszono błąd przez Det_ReportError */
+        1:   59:    TEST_CHECK(Det_ReportError_fake.call_count == 1);
+        1:   60:    TEST_CHECK(Det_ReportError_fake.arg0_val == MODULE_ID_LINSM);
+        1:   61:    TEST_CHECK(Det_ReportError_fake.arg1_val == INSTANCE_ID);
+        1:   62:    TEST_CHECK(Det_ReportError_fake.arg2_val == LINSM_INIT_SID);
+        1:   63:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_PARAM_POINTER);
+        -:   64:
+        -:   65:    /* Wywołanie funkcji z poprawnym parametrem */
+        1:   66:    LinSM_Init(&LinSM_Config);
+        -:   67:
+        -:   68:    /* Sprawdzenie, czy moduł został poprawnie zainicjalizowany */
+        1:   69:    TEST_CHECK(LinSM_MainState == LINSM_INIT);
+        1:   70:    TEST_MSG("LinSM_MainState powinien być ustawiony na LINSM_INIT.");
+        1:   71:}
+        -:   72:
+        1:   73:void test_LinSM_ScheduleRequest(void) {
+        1:   74:    ResetAllMocks();
+        -:   75:	Std_ReturnType result;
+        -:   76:    /* Test z niezainicjalizowanym modułem */
+        -:   77:	
+        1:   78:    result = LinSM_ScheduleRequest(0, 0);
+        1:   79:    TEST_CHECK(result == E_NOT_OK);
+        1:   80:    TEST_CHECK(Det_ReportError_fake.call_count == 1);
+        1:   81:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_UNINIT);
+        -:   82:	
+        1:   83:	LinSM_Init(&LinSM_Config);
+        -:   84:	
+        -:   85:    /* Test z nieprawidłowym kanałem */
+        1:   86:    result = LinSM_ScheduleRequest(LINSM_MAX_CHANNELS + 1, 0);
+        1:   87:    TEST_CHECK(result == E_NOT_OK);
+        1:   88:    TEST_CHECK(Det_ReportError_fake.call_count == 2);
+        1:   89:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_NONEXISTENT_NETWORK);
+        -:   90:
+        -:   91:    /* Test z nieprawidłowym harmonogramem */
+        1:   92:    result = LinSM_ScheduleRequest(0, NUM_SCHEDULES + 1);
+        1:   93:    TEST_CHECK(result == E_NOT_OK);
+        1:   94:    TEST_CHECK(Det_ReportError_fake.call_count == 3);
+        1:   95:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_PARAMETER);
+        -:   96:
+        1:   97:	LinSM_Timer[0].timerActive = TRUE;
+        1:   98:	result = LinSM_ScheduleRequest(0, 0);
+        1:   99:	TEST_CHECK(result == E_NOT_OK);
+        -:  100:	
+        1:  101:	LinSM_Timer[0].timerActive = FALSE;
+        1:  102:	LinSM_Mode = LINSM_NO_COM;
+        1:  103:	result = LinSM_ScheduleRequest(0, 0);
+        1:  104:	TEST_CHECK(result == E_NOT_OK);
+        -:  105:	
+        1:  106:	LinSM_Init(&LinSM_Config);
+        1:  107:	LinSM_Mode = LINSM_FULL_COM;
+        1:  108:	LinSM_SubState = LINSM_RUN_COMMUNICATION;
+        -:  109:	
+        1:  110:	LinIf_ScheduleRequest_fake.return_val = E_OK;
+        1:  111:	result = LinSM_ScheduleRequest(0, 0);
+        1:  112:    TEST_CHECK(result == E_OK);
+        -:  113:	
+        -:  114:	//result = LinSM_ScheduleRequest(1, 0);
+        -:  115:	//TEST_CHECK(result == E_NOT_OK);
+        -:  116:	
+        -:  117:
+        1:  118:}
+        -:  119:
+        1:  120:void test_LinSM_ScheduleRequest_error(void) {
+        1:  121:    ResetAllMocks();
+        -:  122:	Std_ReturnType result;
+        -:  123:
+        1:  124:	LinSM_Init(&LinSM_Config);
+        -:  125:
+        1:  126:	LinSM_Mode = LINSM_FULL_COM;
+        1:  127:	LinSM_SubState = LINSM_RUN_COMMUNICATION;
+        -:  128:	
+        1:  129:	LinIf_ScheduleRequest_fake.return_val = E_NOT_OK;
+        1:  130:	result = LinSM_ScheduleRequest(0, 0);
+        1:  131:    TEST_CHECK(result == E_NOT_OK);
+        1:  132:	TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_INIT_FAILED);
+        -:  133:	
+        -:  134:
+        1:  135:}
+        -:  136:
+        1:  137:void test_LinSM_GetVersionInfo(void) {
+        1:  138:    ResetAllMocks();
+        -:  139:
+        -:  140:    Std_VersionInfoType versionInfo;
+        1:  141:    LinSM_GetVersionInfo(&versionInfo);
+        -:  142:
+        1:  143:    TEST_CHECK(versionInfo.vendorID == LINSM_VENDOR_ID);
+        1:  144:    TEST_CHECK(versionInfo.moduleID == LINSM_MODULE_ID);
+        1:  145:    TEST_CHECK(versionInfo.sw_major_version == LINSM_SW_MAJOR_VERSION);
+        1:  146:    TEST_CHECK(versionInfo.sw_minor_version == LINSM_SW_MINOR_VERSION);
+        1:  147:    TEST_CHECK(versionInfo.sw_patch_version == LINSM_SW_PATCH_VERSION);
+        -:  148:	
+        1:  149:	LinSM_GetVersionInfo(NULL);
+        1:  150:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_PARAM_POINTER);
+        1:  151:}
+        -:  152:
+        1:  153:void test_LinSM_GetCurrentComMode(void) {
+        1:  154:    ResetAllMocks();
+        -:  155:	ComM_ModeType mode;
+        -:  156:	Std_ReturnType result;
+        -:  157:	
+        -:  158:
+        1:  159:	result = LinSM_GetCurrentComMode(0, &mode);
+        1:  160:	TEST_CHECK(result == E_NOT_OK);
+        1:  161:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_UNINIT);
+        -:  162:	
+        1:  163:	LinSM_Init(&LinSM_Config);	
+        -:  164:
+        1:  165:	result = LinSM_GetCurrentComMode(LINSM_MAX_CHANNELS + 1, &mode);
+        1:  166:	TEST_CHECK(result == E_NOT_OK);
+        1:  167:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_NONEXISTENT_NETWORK);
+        -:  168:	
+        1:  169:    result = LinSM_GetCurrentComMode(0, &mode);
+        1:  170:    TEST_CHECK(result == E_OK);
+        1:  171:    TEST_CHECK(mode == COMM_NO_COMMUNICATION);
+        -:  172:	
+        1:  173:	LinSM_Mode = LINSM_FULL_COM;
+        1:  174:	result = LinSM_GetCurrentComMode(0, &mode);
+        1:  175:	TEST_CHECK(result == E_OK);
+        1:  176:    TEST_CHECK(mode == COMM_FULL_COMMUNICATION);
+        -:  177:	
+        1:  178:	result = LinSM_GetCurrentComMode(0, NULL);
+        1:  179:	TEST_CHECK(result == E_NOT_OK);
+        1:  180:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_PARAM_POINTER);
+        1:  181:}
+        -:  182:
+        1:  183:void test_LinSM_RequestComMode_error(void) {
+        1:  184:    ResetAllMocks();
+        -:  185:	Std_ReturnType result;
+        1:  186:	LinIf_WakeUp_fake.return_val = E_NOT_OK;
+        1:  187:	LinIf_GotoSleep_fake.return_val = E_NOT_OK;
+        -:  188:	
+        1:  189:	result = LinSM_RequestComMode(0, COMM_FULL_COMMUNICATION);
+        1:  190:	TEST_CHECK(result == E_NOT_OK);
+        1:  191:	TEST_CHECK(Det_ReportError_fake.call_count == 1);
+        1:  192:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_UNINIT);
+        -:  193:	
+        1:  194:	LinSM_Init(&LinSM_Config);
+        -:  195:	
+        1:  196:	LinSM_Mode = LINSM_NO_COM;
+        1:  197:    result = LinSM_RequestComMode(0, COMM_FULL_COMMUNICATION);
+        1:  198:	TEST_CHECK(LinSM_Mode == LINSM_NO_COM);
+        1:  199:	TEST_CHECK(result == E_NOT_OK);
+        1:  200:	TEST_CHECK(Det_ReportError_fake.call_count == 2);
+        1:  201:	TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_INIT_FAILED);
+        -:  202:	
+        1:  203:	LinSM_Mode = LINSM_FULL_COM;
+        1:  204:	LinSM_SubState = LINSM_RUN_COMMUNICATION;
+        1:  205:	result = LinSM_RequestComMode(0, COMM_NO_COMMUNICATION);
+        1:  206:	TEST_CHECK(result == E_NOT_OK);
+        1:  207:	TEST_CHECK(Det_ReportError_fake.call_count == 3);
+        1:  208:	TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_INIT_FAILED);
+        1:  209:}
+        -:  210:
+        1:  211:void test_LinSM_RequestComMode(void) {
+        1:  212:    ResetAllMocks();
+        -:  213:	Std_ReturnType result;
+        -:  214:	
+        1:  215:	result = LinSM_RequestComMode(0, COMM_FULL_COMMUNICATION);
+        1:  216:	TEST_CHECK(result == E_NOT_OK);
+        1:  217:	TEST_CHECK(Det_ReportError_fake.call_count == 1);
+        1:  218:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_UNINIT);
+        -:  219:	
+        1:  220:	LinSM_Init(&LinSM_Config);
+        -:  221:	
+        1:  222:	result = LinSM_RequestComMode(LINSM_MAX_CHANNELS + 1, COMM_FULL_COMMUNICATION);
+        1:  223:	TEST_CHECK(result == E_NOT_OK);
+        1:  224:	TEST_CHECK(Det_ReportError_fake.call_count == 2);
+        1:  225:    TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_NONEXISTENT_NETWORK);
+        -:  226:	
+        1:  227:	result = LinSM_RequestComMode(0, COMM_SILENT_COMMUNICATION);
+        1:  228:	TEST_CHECK(result == E_NOT_OK);
+        1:  229:	TEST_CHECK(Det_ReportError_fake.call_count == 3);
+        1:  230:	TEST_CHECK(Det_ReportError_fake.arg3_val == LINSM_E_PARAMETER);
+        -:  231:	
+        1:  232:	ResetAllMocks();
+        1:  233:	LinSM_Init(&LinSM_Config);
+        -:  234:	
+        1:  235:	LinSM_Mode = LINSM_NO_COM;
+        1:  236:    result = LinSM_RequestComMode(0, COMM_FULL_COMMUNICATION);
+        1:  237:    TEST_CHECK(result == E_OK);
+        -:  238:	
+        1:  239:	LinSM_Mode = LINSM_FULL_COM;
+        1:  240:	LinSM_SubState = LINSM_RUN_COMMUNICATION;
+        1:  241:	result = LinSM_RequestComMode(0, COMM_NO_COMMUNICATION);
+        1:  242:	TEST_CHECK(result == E_OK);
+        1:  243:}
+        -:  244:
+        1:  245:void test_LinSM_MainFunction_Uninit(void) {
+        1:  246:    ResetAllMocks();
+        -:  247:
+        1:  248:    LinSM_MainFunction();
+        -:  249:
+        1:  250:    TEST_CHECK(LinSM_MainState == LINSM_INIT); // Powinno przejść do stanu INIT
+        -:  251:	
+        1:  252:    TEST_CHECK(LinIf_SetTrcvMode_fake.arg1_val == LIN_TRCV_MODE_STANDBY); // Nie powinno być wywołań LinIf_SetTrcvMode
+        1:  253:}
+        -:  254:
+    #####:  255:void test_LinSM_MainFunction_PassiveTrcvMode(void) {
+    #####:  256:    ResetAllMocks();
+        -:  257:	
+    #####:  258:	LinSM_MainState = LINSM_INIT;
+    #####:  259:	LinSM_Init(&LinSM_Config_test);
+    #####:  260:    LinSM_MainFunction();
+        -:  261:
+    #####:  262:	TEST_CHECK(LinIf_SetTrcvMode_fake.arg1_val == LIN_TRCV_MODE_SLEEP);
+        -:  263:
+    #####:  264:}
+        -:  265:
+        1:  266:void test_LinSM_MainFunction(void) {
+        1:  267:    ResetAllMocks();
+        -:  268:
+        -:  269:    /* Wywołanie funkcji głównej */
+        1:  270:	LinSM_Init(&LinSM_Config);
+        1:  271:    LinSM_MainFunction();
+        -:  272:
+        -:  273:    /* Sprawdzenie poprawności działania (np. resetowanie timerów) */
+        -:  274:    //TEST_CHECK(LinSM_Timer[0].timerActive == FALSE);
+        1:  275:}
+        -:  276:
+        1:  277:void test_LinSM_MainFunction_NO_COM(void) {
+        1:  278:    ResetAllMocks();
+        -:  279:
+        1:  280:    LinSM_MainState = LINSM_INIT;
+        1:  281:    LinSM_Mode = LINSM_NO_COM;
+        1:  282:    LinSM_Timer[0].timerActive = TRUE;
+        1:  283:    LinSM_Timer[0].requestTimer = 10;
+        1:  284:    LinSM_WakeupConfirmed[0] = TRUE;
+        -:  285:
+        1:  286:    LinSM_MainFunction();
+        -:  287:
+        1:  288:	TEST_CHECK(LinSM_Timer[0].requestTimer == 0); 
+        1:  289:    TEST_CHECK(LinSM_Timer[0].timerActive == FALSE); 
+        1:  290:    TEST_CHECK(LinSM_Mode == LINSM_FULL_COM); // Powinno przejść do pełnej komunikacji
+        1:  291:    TEST_CHECK(LinSM_SubState == LINSM_RUN_COMMUNICATION); // Powinno przejść do RUN_COMMUNICATION
+        1:  292:}
+        -:  293:
+        1:  294:void test_LinSM_MainFunction_NO_COM_timeout(void) {
+        1:  295:    ResetAllMocks();
+        -:  296:
+        1:  297:    LinSM_MainState = LINSM_INIT;
+        1:  298:    LinSM_Mode = LINSM_NO_COM;
+        1:  299:    LinSM_Timer[0].timerActive = TRUE;
+        1:  300:    LinSM_Timer[0].requestTimer = 1;
+        1:  301:    LinSM_WakeupConfirmed[0] = FALSE;
+        -:  302:
+        1:  303:    LinSM_MainFunction();
+        -:  304:
+        1:  305:    TEST_CHECK(LinSM_Timer[0].timerActive == TRUE); // Timer powinien zostać wyłączony
+        1:  306:    TEST_CHECK(LinSM_Mode == LINSM_NO_COM); // Powinno przejść do pełnej komunikacji
+        1:  307:    TEST_CHECK(LinSM_Timer[0].retryCount == 1); // Powinno przejść do RUN_COMMUNICATION
+        1:  308:	TEST_CHECK(Det_ReportRuntimeError_fake.arg3_val == LINSM_E_CONFIRMATION_TIMEOUT);
+        1:  309:}
+        -:  310:
+        1:  311:void test_LinSM_MainFunction_NO_COM_WakeUp_after_timeout(void) {
+        1:  312:    ResetAllMocks();
+        1:  313:	LinIf_WakeUp_fake.return_val = E_NOT_OK;
+        1:  314:    LinSM_MainState = LINSM_INIT;
+        1:  315:    LinSM_Mode = LINSM_NO_COM;
+        1:  316:    LinSM_Timer[0].timerActive = TRUE;
+        1:  317:    LinSM_Timer[0].requestTimer = 1;
+        1:  318:    LinSM_WakeupConfirmed[0] = FALSE;
+        -:  319:
+        1:  320:    LinSM_MainFunction();
+        -:  321:
+        1:  322:    TEST_CHECK(LinSM_Timer[0].timerActive == FALSE); // Timer powinien zostać wyłączony
+        1:  323:    TEST_CHECK(LinSM_Mode == LINSM_NO_COM); // Powinno przejść do pełnej komunikacji
+        1:  324:    TEST_CHECK(LinSM_Timer[0].requestTimer == 0); // Powinno przejść do RUN_COMMUNICATION
+        1:  325:	TEST_CHECK(Det_ReportRuntimeError_fake.arg3_val == LINSM_E_CONFIRMATION_TIMEOUT);
+        1:  326:}
+        -:  327:
+        1:  328:void test_LinSM_MainFunction_NO_COM_RetryCount(void) {
+        1:  329:    ResetAllMocks();
+        -:  330:	//LinIf_WakeUp_fake.return_val = E_OK;
+        1:  331:    LinSM_MainState = LINSM_INIT;
+        1:  332:	LinSM_Mode = LINSM_NO_COM;
+        1:  333:	LinSM_Timer[0].timerActive = TRUE;
+        1:  334:	LinSM_Timer[0].requestTimer = 0;
+        1:  335:	LinSM_Timer[0].retryCount = 5;
+        1:  336:    LinSM_WakeupConfirmed[0] = FALSE;
+        -:  337:
+        1:  338:    LinSM_MainFunction();
+        -:  339:
+        1:  340:    TEST_CHECK(LinSM_Timer[0].timerActive == FALSE); 
+        1:  341:    TEST_CHECK(LinSM_Mode == LINSM_NO_COM); 
+        1:  342:    TEST_CHECK(LinSM_Timer[0].requestTimer == 0);
+        1:  343:	TEST_CHECK(LinSM_Timer[0].retryCount == 0);
+        1:  344:	TEST_CHECK(ComM_BusSM_ModeIndication_fake.arg1_val == COMM_NO_COMMUNICATION);
+        1:  345:	TEST_CHECK(BswM_LinSM_CurrentState_fake.arg1_val == LINSM_NO_COM);
+        1:  346:}
+        -:  347:
+        1:  348:void test_LinSM_MainFunction_FULL_COM(void) {
+        1:  349:    ResetAllMocks();
+        -:  350:	
+        1:  351:	LinSM_MainState = LINSM_INIT;
+        1:  352:    LinSM_Mode = LINSM_FULL_COM;
+        1:  353:    LinSM_Timer[0].timerActive = TRUE;
+        1:  354:    LinSM_Timer[0].requestTimer = 10;
+        1:  355:    LinSM_ScheduleConfirmed[0] = TRUE;
+        -:  356:
+        1:  357:    LinSM_MainFunction();
+        -:  358:
+        1:  359:	TEST_CHECK(LinSM_Timer[0].requestTimer == 0); 
+        1:  360:    TEST_CHECK(LinSM_Timer[0].timerActive == FALSE); 
+        1:  361:	TEST_CHECK(ComM_BusSM_ModeIndication_fake.arg1_val == COMM_FULL_COMMUNICATION);
+        1:  362:	TEST_CHECK(BswM_LinSM_CurrentState_fake.arg1_val == LINSM_FULL_COM);
+        -:  363:
+        1:  364:}
+        -:  365:
+        1:  366:void test_LinSM_MainFunction_FULL_COM_timeout(void) {
+        1:  367:    ResetAllMocks();
+        -:  368:
+        1:  369:    LinSM_MainState = LINSM_INIT;
+        1:  370:    LinSM_Mode = LINSM_FULL_COM;
+        1:  371:    LinSM_Timer[0].timerActive = TRUE;
+        1:  372:    LinSM_Timer[0].requestTimer = 1;
+        1:  373:    LinSM_ScheduleConfirmed[0] = FALSE;
+        -:  374:
+        1:  375:    LinSM_MainFunction();
+        -:  376:
+        1:  377:    TEST_CHECK(LinSM_Timer[0].timerActive == FALSE); 
+        1:  378:    TEST_CHECK(LinSM_Mode == LINSM_FULL_COM); 
+        1:  379:	TEST_CHECK(Det_ReportRuntimeError_fake.arg3_val == LINSM_E_CONFIRMATION_TIMEOUT);
+        1:  380:	TEST_CHECK(ComM_BusSM_ModeIndication_fake.arg1_val == COMM_FULL_COMMUNICATION);
+        1:  381:	TEST_CHECK(BswM_LinSM_CurrentState_fake.arg1_val == LINSM_FULL_COM);
+        1:  382:	TEST_CHECK(BswM_LinSM_CurrentComMode_fake.arg1_val == COMM_NO_COMMUNICATION);
+        1:  383:}
+        -:  384:
+        1:  385:void test_LinSM_MainFunction_FULL_COM_sch_req_err(void) {
+        1:  386:    ResetAllMocks();
+        -:  387:
+        1:  388:    LinSM_MainState = LINSM_INIT;
+        1:  389:    LinSM_Mode = LINSM_FULL_COM;
+        1:  390:	LinSM_ScheduleRequestError[0] = TRUE;
+        -:  391:
+        1:  392:    LinSM_MainFunction();
+        -:  393:
+        1:  394:    TEST_CHECK(LinSM_ScheduleRequestError[0] == FALSE); 
+        -:  395:
+        1:  396:}
+        -:  397:
+        1:  398:void test_LinSM_MainFunction_GO_TO_SLEEP(void) {
+        1:  399:    ResetAllMocks();
+        -:  400:	
+        1:  401:	LinSM_MainState = LINSM_INIT;
+        1:  402:    LinSM_Mode = LINSM_FULL_COM;
+        1:  403:	LinSM_SubState = LINSM_GOTO_SLEEP;
+        1:  404:    LinSM_Timer[0].timerActive = TRUE;
+        1:  405:    LinSM_Timer[0].requestTimer = 10;
+        1:  406:    LinSM_GotoSleepConfirmed[0] = TRUE;
+        -:  407:
+        1:  408:    LinSM_MainFunction();
+        -:  409:
+        1:  410:	TEST_CHECK(LinSM_Timer[0].requestTimer == 0); 
+        1:  411:    TEST_CHECK(LinSM_Timer[0].timerActive == FALSE); 
+        1:  412:	TEST_CHECK(LinSM_GotoSleepConfirmed[0] == FALSE);
+        1:  413:	TEST_CHECK(LinSM_Mode == LINSM_NO_COM);
+        1:  414:	TEST_CHECK(LinSM_SubState == LINSM_RUN_COMMUNICATION);
+        1:  415:}
+        -:  416:
+        1:  417:void test_LinSM_MainFunction_GO_TO_SLEEP_timeout(void) {
+        1:  418:    ResetAllMocks();
+        -:  419:	
+        1:  420:	LinSM_MainState = LINSM_INIT;
+        1:  421:    LinSM_Mode = LINSM_FULL_COM;
+        1:  422:	LinSM_SubState = LINSM_GOTO_SLEEP;
+        1:  423:    LinSM_Timer[0].timerActive = TRUE;
+        1:  424:    LinSM_Timer[0].requestTimer = 0;
+        1:  425:    LinSM_GotoSleepConfirmed[0] = FALSE;
+        -:  426:
+        1:  427:    LinSM_MainFunction();
+        -:  428:
+        1:  429:	TEST_CHECK(LinSM_Timer[0].requestTimer == 0); 
+        1:  430:    TEST_CHECK(LinSM_Timer[0].timerActive == FALSE); 
+        1:  431:	TEST_CHECK(LinSM_Mode == LINSM_FULL_COM);
+        1:  432:	TEST_CHECK(BswM_LinSM_CurrentComMode_fake.arg1_val == COMM_FULL_COMMUNICATION);
+        1:  433:	TEST_CHECK(LinSM_SubState == LINSM_RUN_COMMUNICATION);
+        1:  434:	TEST_CHECK(Det_ReportRuntimeError_fake.arg3_val == LINSM_E_CONFIRMATION_TIMEOUT);
+        1:  435:}
+        -:  436:/*
+        -:  437:  Lista testów - wpisz tutaj wszystkie funkcje które mają być wykonane jako testy.
+        -:  438:*/
+        -:  439:TEST_LIST = {
+        -:  440:	{ "Test of LinSM_Init", test_LinSM_Init },
+        -:  441:	{ "Test of LinSM_ScheduleRequest", test_LinSM_ScheduleRequest },
+        -:  442:	{ "Test of LinSM_ScheduleRequest_E_NOT_OK", test_LinSM_ScheduleRequest_error },
+        -:  443:	{ "Test of LinSM_MainFunction", test_LinSM_MainFunction },
+        -:  444:	{ "Test of LinSM_GetVersionInfo", test_LinSM_GetVersionInfo },
+        -:  445:    { "Test of LinSM_GetCurrentComMode", test_LinSM_GetCurrentComMode },   /* Format to { "nazwa testu", nazwa_funkcji } */
+        -:  446:	{ "Test of LinSM_RequestComMode", test_LinSM_RequestComMode },
+        -:  447:	{ "Test of LinSM_RequestComMode_E_NOT_OK", test_LinSM_RequestComMode_error },
+        -:  448:	{ "Test of LinSM_MainFunction_Uninit", test_LinSM_MainFunction_Uninit },
+        -:  449:	{ "Test of LinSM_MainFunction_NO_COM", test_LinSM_MainFunction_NO_COM },
+        -:  450:	{ "Test of LinSM_MainFunction_NO_COM_timeout", test_LinSM_MainFunction_NO_COM_timeout },
+        -:  451:	{ "Test of LinSM_MainFunction_NO_COM_WakeUp_after_timeout", test_LinSM_MainFunction_NO_COM_WakeUp_after_timeout },
+        -:  452:	{ "Test of LinSM_MainFunction_NO_COM_RetryCount", test_LinSM_MainFunction_NO_COM_RetryCount },
+        -:  453:	{ "Test of LinSM_MainFunction_FULL_COM", test_LinSM_MainFunction_FULL_COM },
+        -:  454:	{ "Test of LinSM_MainFunction_FULL_COM_timeout", test_LinSM_MainFunction_FULL_COM_timeout },
+        -:  455:	{ "Test of LinSM_MainFunction_FULL_COM_sch_req_err", test_LinSM_MainFunction_FULL_COM_sch_req_err },
+        -:  456:	{ "Test of LinSM_MainFunction_GO_TO_SLEEP", test_LinSM_MainFunction_GO_TO_SLEEP },
+        -:  457:	{ "Test of LinSM_MainFunction_GO_TO_SLEEP_timeout", test_LinSM_MainFunction_GO_TO_SLEEP_timeout },
+        -:  458:    { NULL, NULL }                                        /* To musi być na końcu */
+        -:  459:};
+        -:  460:
+        -:  461:

@@ -1,0 +1,603 @@
+        -:    0:Source:src/LinSM.c
+        -:    0:Graph:UT_LinSM.gcno
+        -:    0:Data:UT_LinSM.gcda
+        -:    0:Runs:19
+        -:    1:/**===================================================================================================================*\
+        -:    2:  @file LinSM.c
+        -:    3:
+        -:    4:  @brief Biblioteka LinSM - implementacja
+        -:    5:  
+        -:    6:  Implementacja funkcjonalności 
+        -:    7:
+        -:    8:\*====================================================================================================================*/
+        -:    9:
+        -:   10:/*====================================================================================================================*\
+        -:   11:    Załączenie nagłówków
+        -:   12:\*====================================================================================================================*/
+        -:   13:#include "LinSM.h"
+        -:   14:
+        -:   15:/*====================================================================================================================*\
+        -:   16:    Makra lokalne
+        -:   17:\*====================================================================================================================*/
+        -:   18:
+        -:   19:/*====================================================================================================================*\
+        -:   20:    Typy lokalne
+        -:   21:\*====================================================================================================================*/
+        -:   22:
+        -:   23:/*====================================================================================================================*\
+        -:   24:    Zmienne globalne
+        -:   25:\*====================================================================================================================*/
+        -:   26:LinSM_ChannelTimers LinSM_Timer[LINSM_MAX_CHANNELS];
+        -:   27:// Zmienne globalne przechowujące aktualny stan główny i substan
+        -:   28:LinSM_MainStateType LinSM_MainState = LINSM_UNINIT; //[SWS_LinSM_00161]
+        -:   29:LinSM_ModeType LinSM_Mode = LINSM_NO_COM;
+        -:   30:LinSM_SubStateType LinSM_SubState = LINSM_RUN_COMMUNICATION;
+        -:   31:
+        -:   32:/* Global variables to track schedule confirmation and timer */
+        -:   33:static boolean LinSM_ScheduleConfirmationPending[LINSM_MAX_CHANNELS] = {FALSE}; /* Confirmation pending flag */
+        -:   34:
+        -:   35:/*====================================================================================================================*\
+        -:   36:    Zmienne lokalne (statyczne)
+        -:   37:\*====================================================================================================================*/
+        -:   38:/* Global variable to track the current schedule index */
+        -:   39:static boolean LinSM_ScheduleUpdatePending[LINSM_MAX_CHANNELS] = {FALSE}; /* To track if an update is pending */
+        -:   40:static LinIf_SchHandleType LinSM_CurrentScheduleIndex[LINSM_MAX_CHANNELS];
+        -:   41:
+        -:   42:
+        -:   43:/* Flagi potwierdzenia harmonogramu dla każdego kanału */
+        -:   44:static boolean LinSM_GotoSleepConfirmed[LINSM_MAX_CHANNELS] = {FALSE};
+        -:   45:static boolean LinSM_ScheduleConfirmed[LINSM_MAX_CHANNELS] = {FALSE};
+        -:   46:static boolean LinSM_WakeupConfirmed[LINSM_MAX_CHANNELS] = {FALSE};
+        -:   47:static boolean LinSM_TimerActive[LINSM_MAX_CHANNELS] = {FALSE};
+        -:   48:static boolean LinSM_ScheduleRequestError[LINSM_MAX_CHANNELS] = {FALSE};
+        -:   49:
+        -:   50:/*====================================================================================================================*\
+        -:   51:    Deklaracje funkcji lokalnych
+        -:   52:\*====================================================================================================================*/
+        -:   53:
+        -:   54:/*====================================================================================================================*\
+        -:   55:    Kod funkcji
+        -:   56:\*====================================================================================================================*/
+        -:   57:
+        -:   58:const LinSM_ConfigType LinSM_Config = {
+        -:   59:    .LinSMConfigSet = {
+        -:   60:        .LinSMModeRequestRepetitionMax = 3, // Maksymalna liczba powtórzeń żądań trybu
+        -:   61:
+        -:   62:        .LinSMChannel = {
+        -:   63:            { // Konfiguracja kanału 1
+        -:   64:                .LinSMConfirmationTimeout = 5.0f,   // 5 sekund na potwierdzenie
+        -:   65:                .LinSMNodeType = 0x01,             // MASTER
+        -:   66:                .LinSMSilenceAfterWakeupTimeout = 0.0f, // Nie dotyczy MASTER
+        -:   67:                .LinSMTransceiverPassiveMode = FALSE, // Aktywny tryb transceivera
+        -:   68:                .LinSMComMNetworkHandleRef = 1,    // Referencja do sieci ComM
+        -:   69:                .LinSMSchedule = {
+        -:   70:                    { 
+        -:   71:                        .LinSMScheduleIndex = 1,   // Indeks harmonogramu 1 dla kanału 1
+        -:   72:                        .LinSMScheduleIndexRef = 10 // Referencja harmonogramu 1 w LinIf
+        -:   73:                    },
+        -:   74:                    { 
+        -:   75:                        .LinSMScheduleIndex = 2,   // Indeks harmonogramu 2 dla kanału 1
+        -:   76:                        .LinSMScheduleIndexRef = 11 // Referencja harmonogramu 2 w LinIf
+        -:   77:                    }
+        -:   78:                }
+        -:   79:            },
+        -:   80:        }
+        -:   81:    },
+        -:   82:
+        -:   83:    .LinSMGeneral = {
+        -:   84:        .LinSMDevErrorDetect = TRUE,             // Włączone wykrywanie błędów
+        -:   85:        .LinSMMainProcessingPeriod = 0.01f,      // Okres 10 ms
+        -:   86:        .LinSMVersionInfoApi = TRUE              // Włączone API informacji o wersji
+        -:   87:    }
+        -:   88:};
+        -:   89:
+        -:   90:const LinSM_ConfigType LinSM_Config_test = {
+        -:   91:    .LinSMConfigSet = {
+        -:   92:        .LinSMModeRequestRepetitionMax = 3, // Maksymalna liczba powtórzeń żądań trybu
+        -:   93:
+        -:   94:        .LinSMChannel = {
+        -:   95:
+        -:   96:            { // Konfiguracja kanału 2
+        -:   97:                .LinSMConfirmationTimeout = 3.0f,   // 3 sekundy na potwierdzenie
+        -:   98:                .LinSMNodeType = 0x00,             // SLAVE
+        -:   99:                .LinSMSilenceAfterWakeupTimeout = 1.0f, // Czas ciszy po wybudzeniu
+        -:  100:                .LinSMTransceiverPassiveMode = TRUE, // Pasywny tryb transceivera
+        -:  101:                .LinSMComMNetworkHandleRef = 2,    // Referencja do innej sieci ComM
+        -:  102:                .LinSMSchedule = {
+        -:  103:                    { 
+        -:  104:                        .LinSMScheduleIndex = 3,   // Indeks harmonogramu 3 dla kanału 2
+        -:  105:                        .LinSMScheduleIndexRef = 20 // Referencja harmonogramu 3 w LinIf
+        -:  106:                    },
+        -:  107:                    { 
+        -:  108:                        .LinSMScheduleIndex = 4,   // Indeks harmonogramu 4 dla kanału 2
+        -:  109:                        .LinSMScheduleIndexRef = 21 // Referencja harmonogramu 4 w LinIf
+        -:  110:                    }
+        -:  111:                }
+        -:  112:            },
+        -:  113:        }
+        -:  114:    },
+        -:  115:
+        -:  116:    .LinSMGeneral = {
+        -:  117:        .LinSMDevErrorDetect = TRUE,             // Włączone wykrywanie błędów
+        -:  118:        .LinSMMainProcessingPeriod = 0.01f,      // Okres 10 ms
+        -:  119:        .LinSMVersionInfoApi = TRUE              // Włączone API informacji o wersji
+        -:  120:    }
+        -:  121:};
+        -:  122:
+        -:  123:/* API Implementations */
+        -:  124:/**
+        -:  125:  @brief 8.3.1 LinSM_Init [SWS_LinSM_00166] [SWS_LinSM_00204]
+        -:  126:
+        -:  127:  OPIS
+        -:  128:  Element projektu: 
+        -:  129:*/
+       11:  130:void LinSM_Init(const LinSM_ConfigType* ConfigPtr) { //[SWS_LinSM_00043] - reset wszystkich zmiennych globalnych w LinSM_Init
+       11:  131:    if (ConfigPtr == NULL) {
+        1:  132:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_INIT_SID, LINSM_E_PARAM_POINTER);
+        -:  133:
+        -:  134:    }
+       11:  135:    LinSM_MainState = LINSM_INIT; //[SWS_LinSM_00025]
+       11:  136:	LinSM_Mode = LINSM_NO_COM; //[SWS_LinSM_00152][SWS_LinSM_00160]
+       11:  137:	LinSM_SubState = LINSM_RUN_COMMUNICATION;
+        -:  138:	
+        -:  139:    /* Initialize all networks to LINSM_NO_COM */
+      451:  140:    for (uint8 channel = 0; channel < sizeof(ConfigPtr->LinSMConfigSet.LinSMChannel); ++channel) {
+      440:  141:		ComM_BusSM_ModeIndication(channel, COMM_NO_COMMUNICATION);//[SWS_LinSM_00027] void ComM_BusSM_ModeIndication( NetworkHandleType Channel,ComM_ModeType *ComMode );
+      440:  142:		BswM_LinSM_CurrentState(channel, LINSM_NO_COM);//[SWS_LinSM_00193] void BswM_LinSM_CurrentState(NetworkHandleType Network, LinSM_ModeType CurrentState);
+      440:  143:		LinSM_CurrentScheduleIndex[channel] = NULL_SCHEDULE; // [SWS_LinSM_00216]
+      440:  144:		LinSM_ScheduleConfirmationPending[channel] = FALSE;
+      440:  145:		LinSM_ScheduleUpdatePending[channel] = FALSE;
+        -:  146:    }
+        -:  147:	/* Zerowanie timerów dla każdej sieci */
+       33:  148:    for (uint8 channel = 0; channel < LINSM_MAX_CHANNELS; ++channel) {
+       22:  149:		LinSM_Timer[channel].requestTimer = 0;
+       22:  150:        LinSM_Timer[channel].timerActive = FALSE;
+       22:  151:        LinSM_Timer[channel].retryCount = 0;
+        -:  152:    }
+       11:  153:}
+        -:  154:/**
+        -:  155:  @brief 8.3.2 LinSM_ScheduleRequest
+        -:  156:
+        -:  157:  OPIS
+        -:  158:  Element projektu: 
+        -:  159:*/
+        7:  160:Std_ReturnType LinSM_ScheduleRequest(NetworkHandleType channel, LinIf_SchHandleType schedule) {
+        -:  161:	/* Sprawdzenie, czy identyfikator sieci jest w zakresie */
+        7:  162:    if (channel >= LINSM_MAX_CHANNELS) {
+        -:  163:        /* [SWS_LinSM_00114]: Funkcja musi raportować LINSM_E_NONEXISTENT_NETWORK, jeśli sieć nie istnieje. */
+        1:  164:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_SCHEDULEREQUEST_SID, LINSM_E_NONEXISTENT_NETWORK);
+        1:  165:        return E_NOT_OK; 
+        -:  166:    }
+        -:  167:	/* Sprawdzenie, czy harmonogram jest w zakresie */
+        6:  168:    if (schedule >= NUM_SCHEDULES) {
+        -:  169:        /* [SWS_LinSM_00115]: Funkcja raportuje LINSM_E_PARAMETER, jeśli identyfikator harmonogramu jest poza zakresem. */
+        1:  170:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_SCHEDULEREQUEST_SID, LINSM_E_PARAMETER);
+        1:  171:        return E_NOT_OK; 
+        -:  172:    }
+        5:  173:	if (LinSM_MainState == LINSM_UNINIT) {
+        -:  174:        /* [SWS_LinSM_00116]: Funkcja musi raportować LINSM_E_UNINIT, jeśli moduł nie został zainicjalizowany. */
+        1:  175:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_SCHEDULEREQUEST_SID, LINSM_E_UNINIT);
+        1:  176:        return E_NOT_OK; 
+        -:  177:    }
+        -:  178:	/* Sprawdzenie, czy żądanie dla tej sieci jest w toku */
+        4:  179:    if (LinSM_Timer[channel].timerActive) {
+        -:  180:        /* [SWS_LinSM_00163]: Funkcja zwraca E_NOT_OK, jeśli inna zmiana harmonogramu jest w toku dla tej sieci. */
+        1:  181:        return E_NOT_OK;
+        -:  182:    }
+        -:  183:	/* Sprawdzenie, czy moduł znajduje się w stanie LINSM_FULL_COM */
+        3:  184:    if ((LinSM_Mode != LINSM_FULL_COM) || (LinSM_SubState != LINSM_RUN_COMMUNICATION)) {
+        -:  185:        /* [SWS_LinSM_10211]: Funkcja zwraca E_NOT_OK, jeśli LinSM nie jest w stanie LINSM_FULL_COM. */
+        1:  186:        return E_NOT_OK;
+        -:  187:    }
+        -:  188:    /* Sprawdzenie, czy LinSM jest zainicjalizowany */
+        2:  189:	if (LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMNodeType != 0x01) {
+        -:  190:        /* [SWS_LinSM_00241]: If no Master node is configured, this function is unavailable */
+    #####:  191:        return E_NOT_OK;
+        -:  192:    }
+        -:  193:	
+        2:  194:	LinSM_Timer[channel].timerActive = TRUE; //[SWS_LinSM_00100]
+        2:  195:    LinSM_Timer[channel].requestTimer = LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMConfirmationTimeout; /* Ustawienie timera [SWS_LinSM_00206]*/
+        -:  196:    /* Wywołanie LinIf_ScheduleRequest [SWS_LinSM_00079] */ 
+        2:  197:    if (LinIf_ScheduleRequest(channel, schedule) == E_NOT_OK) {
+        1:  198:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_SCHEDULEREQUEST_SID, LINSM_E_INIT_FAILED);
+        -:  199:		/* Zapamiętanie bieżącego harmonogramu */
+        1:  200:        LinSM_CurrentScheduleIndex[channel] = LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMSchedule[0].LinSMScheduleIndex;
+        1:  201:        LinSM_ScheduleUpdatePending[channel] = TRUE; /* Oznacz aktualizację jako oczekującą */
+        1:  202:		LinSM_ScheduleRequestError[channel] = TRUE;
+        1:  203:		LinSM_Timer[channel].timerActive = FALSE;
+        1:  204:		LinSM_Timer[channel].requestTimer = 0;
+        1:  205:        return E_NOT_OK;
+        -:  206:    } else {
+        -:  207:		/* Ustawienie stanu oczekiwania na potwierdzenie */
+        -:  208:        
+        1:  209:		LinSM_ScheduleRequestError[channel] = FALSE;
+        1:  210:		return E_OK; //[SWS_LinSM_00168]
+        -:  211:	}
+        -:  212:    
+        -:  213:}
+        -:  214:/**
+        -:  215:  @brief 8.3.3 LinSM_GetVersionInfo 
+        -:  216:
+        -:  217:  OPIS
+        -:  218:  Element projektu: 
+        -:  219:*/
+        -:  220:
+        2:  221:void LinSM_GetVersionInfo(Std_VersionInfoType* versioninfo) {
+        2:  222:    if (versioninfo == NULL) {
+        1:  223:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_GETVERSIONINFO_SID, LINSM_E_PARAM_POINTER);
+        1:  224:        return;
+        -:  225:    }
+        1:  226:    versioninfo->vendorID = LINSM_VENDOR_ID;
+        1:  227:    versioninfo->moduleID = LINSM_MODULE_ID;
+        1:  228:    versioninfo->sw_major_version = LINSM_SW_MAJOR_VERSION;
+        1:  229:    versioninfo->sw_minor_version = LINSM_SW_MINOR_VERSION;
+        1:  230:    versioninfo->sw_patch_version = LINSM_SW_PATCH_VERSION;
+        -:  231:}
+        -:  232:/**
+        -:  233:  @brief 8.3.4 LinSM_GetCurrentComMode
+        -:  234:
+        -:  235:  OPIS
+        -:  236:  Element projektu: 
+        -:  237:*/
+        5:  238:Std_ReturnType LinSM_GetCurrentComMode(NetworkHandleType channel, ComM_ModeType* reqComMode) {
+        -:  239:		/* Sprawdzenie, czy wskaźnik reqComMode nie jest NULL */
+        5:  240:    if (reqComMode == NULL) {
+        -:  241:        /* [SWS_LinSM_00124]: Jeśli wskaźnik reqComMode jest NULL, zgłoś błąd LINSM_E_PARAM_POINTER i zwróć E_NOT_OK */
+        1:  242:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_GETCURRENTCOMMODE_SID, LINSM_E_PARAM_POINTER);
+        1:  243:        return E_NOT_OK;
+        -:  244:    }
+        -:  245:	/* Sprawdzenie, czy identyfikator sieci jest w zakresie */
+        4:  246:    if (channel >= LINSM_MAX_CHANNELS) {
+        -:  247:        /* [SWS_LinSM_00123]: Jeśli identyfikator sieci jest poza zakresem, zgłoś błąd LINSM_E_NONEXISTENT_NETWORK i zwróć E_NOT_OK */
+        1:  248:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_GETCURRENTCOMMODE_SID, LINSM_E_NONEXISTENT_NETWORK);
+        1:  249:        return E_NOT_OK;
+        -:  250:    }
+        -:  251:    /* Sprawdzenie, czy moduł LinSM jest zainicjalizowany */
+        3:  252:    if (LinSM_MainState == LINSM_UNINIT) {
+        -:  253:        /* [SWS_LinSM_00125]: Jeśli LinSM nie jest zainicjalizowany, zgłoś błąd LINSM_E_UNINIT i zwróć E_NOT_OK
+        -:  254:		   [SWS_LinSM_00182]: Jeśli LinSM nie jest zainicjalizowany, zwróć COMM_NO_COMMUNICATION*/
+        1:  255:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_GETCURRENTCOMMODE_SID, LINSM_E_UNINIT);
+        1:  256:		*reqComMode = COMM_NO_COMMUNICATION;
+        1:  257:        return E_NOT_OK;
+        -:  258:    }
+        -:  259:	
+        2:  260:	if (LinSM_Mode == LINSM_NO_COM) {
+        -:  261:        /* [SWS_LinSM_00180]: W przeciwnym razie zwróć COMM_NO_COMMUNICATION */
+        1:  262:        *reqComMode = COMM_NO_COMMUNICATION;
+        -:  263:    }
+        -:  264:    /* Ustawienie trybu komunikacji w zależności od stanu LinSM */
+        2:  265:    if (LinSM_Mode == LINSM_FULL_COM) {
+        -:  266:        /* [SWS_LinSM_00181]: Jeśli aktywny stan to LINSM_FULL_COM, zwróć COMM_FULL_COMMUNICATION */
+        1:  267:        *reqComMode = COMM_FULL_COMMUNICATION;
+        -:  268:    } 
+        -:  269:	
+        2:  270:    return E_OK;
+        -:  271:}
+        -:  272:/**
+        -:  273:  @brief 8.3.5 LinSM_RequestComMode
+        -:  274:
+        -:  275:  OPIS
+        -:  276:  Element projektu: 
+        -:  277:*/
+        8:  278:Std_ReturnType LinSM_RequestComMode(NetworkHandleType channel, ComM_ModeType reqComMode) {
+        -:  279:	/* Sprawdzenie, czy identyfikator sieci jest w zakresie */
+        8:  280:    if (channel >= LINSM_MAX_CHANNELS) {
+        -:  281:        /* [SWS_LinSM_00127]: Funkcja zgłasza błąd LINSM_E_NONEXISTENT_NETWORK, jeśli identyfikator sieci jest poza zakresem */
+        1:  282:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_REQUESTCOMMODE_SID, LINSM_E_NONEXISTENT_NETWORK);
+        1:  283:        return E_NOT_OK;
+        -:  284:    }
+        -:  285:    /* Sprawdzenie, czy moduł LinSM jest zainicjalizowany */
+        7:  286:    if (LinSM_MainState == LINSM_UNINIT) {
+        -:  287:        /* [SWS_LinSM_00128]: Funkcja zgłasza błąd LINSM_E_UNINIT, jeśli moduł LinSM nie został zainicjalizowany */
+        2:  288:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_REQUESTCOMMODE_SID, LINSM_E_UNINIT);
+        2:  289:        return E_NOT_OK;
+        -:  290:    }
+        -:  291:
+        -:  292:    /* Sprawdzenie, czy tryb komunikacyjny jest poprawny */
+        5:  293:    if ((reqComMode != COMM_NO_COMMUNICATION) && (reqComMode != COMM_FULL_COMMUNICATION)) {
+        -:  294:        /* [SWS_LinSM_00191]: Funkcja zgłasza błąd LINSM_E_PARAMETER, jeśli tryb jest nieprawidłowy
+        -:  295:			[SWS_LinSM_00183]: Zwróć E_NOT_OK jeżeli reqComMode == COMM_SILENT_COMMUNICATION  		*/
+        1:  296:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_REQUESTCOMMODE_SID, LINSM_E_PARAMETER);
+        1:  297:        return E_NOT_OK;
+        -:  298:    }
+        -:  299:
+        -:  300:    /* Zapamiętaj żądanie zmiany trybu (logika wewnętrzna modułu) */
+        -:  301:    /* [SWS_LinSM_00223]: Funkcja zapisuje żądanie zmiany trybu w strukturach wewnętrznych LinSM */
+        -:  302:    //LinSM_Internal_SetRequestedMode(channel, reqComMode);
+        -:  303:
+        -:  304:    /* Inicjalizacja zmiany trybu komunikacyjnego */
+        4:  305:    if ((reqComMode == COMM_FULL_COMMUNICATION) && (LinSM_Mode == LINSM_NO_COM) && (LinSM_MainState == LINSM_INIT)) {
+        -:  306:        /* Przejście do trybu pełnej komunikacji */
+        2:  307:        LinIf_SetTrcvMode(channel, LIN_TRCV_MODE_NORMAL);
+        2:  308:		LinSM_Timer[channel].timerActive = TRUE; //[SWS_LinSM_00100]
+        2:  309:		LinSM_Timer[channel].requestTimer = LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMConfirmationTimeout; /* Ustawienie timera */
+        2:  310:        if (LinIf_WakeUp(channel) != E_OK) { // [SWS_LinSM_00178] [SWS_LinSM_00202]
+        1:  311:			Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_REQUESTCOMMODE_SID, LINSM_E_INIT_FAILED);
+        1:  312:			LinSM_Mode = LINSM_NO_COM;
+        1:  313:			ComM_BusSM_ModeIndication(channel, COMM_NO_COMMUNICATION);
+        1:  314:            BswM_LinSM_CurrentState(channel, LINSM_NO_COM);
+        1:  315:			LinSM_Timer[channel].timerActive = FALSE;
+        1:  316:			LinSM_Timer[channel].requestTimer = 0; /* Reset timera */
+        1:  317:			return E_NOT_OK; //[SWS_LinSM_00176]
+        -:  318:		}else {
+        1:  319:			return E_OK;
+        -:  320:		}
+        2:  321:    } else if (reqComMode == COMM_NO_COMMUNICATION && LinSM_Mode == LINSM_FULL_COM && LinSM_MainState == LINSM_INIT && LinSM_SubState == LINSM_RUN_COMMUNICATION) { //[SWS_LinSM_00036]
+        -:  322:        /* Przejście do trybu braku komunikacji */
+        2:  323:		LinSM_Timer[channel].timerActive = TRUE; //[SWS_LinSM_00100]
+        2:  324:		LinSM_Timer[channel].requestTimer = LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMConfirmationTimeout; /* Ustawienie timera */
+        2:  325:        if (LinIf_GotoSleep(channel) == E_OK) { //[SWS_LinSM_00047]
+        1:  326:            LinSM_SubState = LINSM_GOTO_SLEEP; /* [SWS_LinSM_00302][SWS_LinSM_00035][SWS_LinSM_10209] */
+        1:  327:			return E_OK;
+        -:  328:        } else {
+        1:  329:            Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_REQUESTCOMMODE_SID, LINSM_E_INIT_FAILED);
+        1:  330:			LinSM_Timer[channel].timerActive = FALSE;
+        1:  331:			LinSM_Timer[channel].requestTimer = 0; /* Reset timera */
+        -:  332:			/* Wywołanie ComM i BswM dla bieżącego stanu */
+        1:  333:            if (LinSM_Mode == LINSM_FULL_COM) {
+        1:  334:                ComM_BusSM_ModeIndication(channel, COMM_FULL_COMMUNICATION);
+        1:  335:                BswM_LinSM_CurrentState(channel, LINSM_FULL_COM);
+        -:  336:            }
+        -:  337:		}
+        -:  338:	}
+        1:  339:	return E_NOT_OK; //[SWS_LinSM_00177]
+        -:  340:}
+        -:  341:
+        -:  342:/**
+        -:  343:  @brief 8.4.1 LinSM_MainFunction
+        -:  344:
+        -:  345:  OPIS
+        -:  346:  Element projektu: 
+        -:  347:*/
+        -:  348:
+       11:  349:	void LinSM_MainFunction(void) { //[SWS_LinSM_00162]
+       11:  350:		uint8 channel = 0;	
+       11:  351:		switch (LinSM_MainState) {
+        1:  352:			case LINSM_UNINIT: //[SWS_LinSM_00022]
+        1:  353:					LinSM_Init(&LinSM_Config);
+        1:  354:				break;
+        -:  355:
+       10:  356:			case LINSM_INIT: //[SWS_LinSM_00024]
+       10:  357:				switch (LinSM_Mode) {
+        5:  358:					case LINSM_NO_COM: //[SWS_LinSM_00026] [SWS_LinSM_00028]
+        5:  359:						if(LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMTransceiverPassiveMode == TRUE){ 
+    #####:  360:							LinIf_SetTrcvMode(LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMComMNetworkHandleRef, LIN_TRCV_MODE_STANDBY); /* [SWS_LinSM_00203] */
+        -:  361:						}else {
+        5:  362:							LinIf_SetTrcvMode(LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMComMNetworkHandleRef, LIN_TRCV_MODE_SLEEP); /* [SWS_LinSM_00203] */
+        -:  363:						}
+        -:  364:						/* Obsługa timera dla sieci */
+        5:  365:						if (LinSM_Timer[channel].timerActive == TRUE) {
+        4:  366:							if (LinSM_Timer[channel].requestTimer > 0) {
+        3:  367:								LinSM_Timer[channel].requestTimer--;
+        -:  368:							}
+        4:  369:							if (LinSM_WakeupConfirmed[channel] == TRUE) {
+        -:  370:								/* Potwierdzenie odebrane przed upływem czasu */
+        1:  371:								LinSM_Timer[channel].requestTimer = 0;  // Reset timera  [SWS_LinSM_00154]
+        1:  372:								LinSM_Timer[channel].timerActive = FALSE; /* Potwierdzenie obsłużone */
+        1:  373:								LinSM_WakeupConfirmed[channel] = FALSE;
+        1:  374:								LinSM_Timer[channel].retryCount = 0;
+        1:  375:								LinSM_Mode = LINSM_FULL_COM; //[SWS_LinSM_00176]
+        1:  376:								LinSM_SubState = LINSM_RUN_COMMUNICATION; //[SWS_LinSM_00301]
+        3:  377:							}else if (LinSM_Timer[channel].requestTimer == 0) {	/* Sprawdzenie timeoutu [SWS_LinSM_00101]*/
+        -:  378:								/* Timeout obsługi żądania - zgłoszenie do BswM */
+        3:  379:								BswM_LinSM_CurrentComMode(channel, COMM_NO_COMMUNICATION);
+        3:  380:								Det_ReportRuntimeError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_MAIN_FUNCTION_API_ID, LINSM_E_CONFIRMATION_TIMEOUT);
+        3:  381:								LinSM_Timer[channel].timerActive = FALSE; /* Reset pending flag */
+        3:  382:								LinSM_Timer[channel].retryCount++;
+        3:  383:								LinSM_Mode = LINSM_NO_COM; 
+        3:  384:								if (LinSM_Timer[channel].retryCount < LinSM_Config.LinSMConfigSet.LinSMModeRequestRepetitionMax) {
+        2:  385:									LinSM_Timer[channel].timerActive = TRUE; //[SWS_LinSM_00100]
+        2:  386:									LinSM_Timer[channel].requestTimer = LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMConfirmationTimeout; /* Ustawienie timera */
+        2:  387:									if (LinIf_WakeUp(channel) != E_OK) { // [SWS_LinSM_00178] [SWS_LinSM_00202]
+        1:  388:										LinSM_Mode = LINSM_NO_COM;
+        1:  389:										ComM_BusSM_ModeIndication(channel, COMM_NO_COMMUNICATION);
+        1:  390:										BswM_LinSM_CurrentState(channel, LINSM_NO_COM);
+        1:  391:										LinSM_Timer[channel].timerActive = FALSE;
+        1:  392:										LinSM_Timer[channel].requestTimer = 0; /* Reset timera */
+        -:  393:									}
+        -:  394:								}else{ //[SWS_LinSM_00170]
+        1:  395:									LinSM_Timer[channel].retryCount = 0; 
+        1:  396:									LinSM_Timer[channel].timerActive = FALSE;
+        1:  397:									LinSM_Timer[channel].requestTimer = 0;
+        1:  398:									ComM_BusSM_ModeIndication(channel, COMM_NO_COMMUNICATION);
+        1:  399:									BswM_LinSM_CurrentState(channel, LINSM_NO_COM);
+        1:  400:									break;
+        -:  401:								}
+        -:  402:							}
+        -:  403:						}						
+        4:  404:						break;
+        5:  405:					case LINSM_FULL_COM: //[SWS_LinSM_00032]
+        5:  406:						ComM_BusSM_ModeIndication(channel, COMM_FULL_COMMUNICATION); //[SWS_LinSM_00033]
+        5:  407:						BswM_LinSM_CurrentState(channel, LINSM_FULL_COM); //[SWS_LinSM_00192]
+        -:  408:						
+        5:  409:						if (LinSM_Config.LinSMConfigSet.LinSMChannel[channel].LinSMTransceiverPassiveMode == TRUE) {
+    #####:  410:							LinIf_SetTrcvMode(channel, LIN_TRCV_MODE_NORMAL); /* [SWS_LinSM_00205] */
+        -:  411:						}
+        -:  412:									
+        5:  413:						switch (LinSM_SubState) {
+        3:  414:							case LINSM_RUN_COMMUNICATION:
+        3:  415:								if (LinSM_ScheduleRequestError[channel]) { //[SWS_LinSM_00213]
+        1:  416:									BswM_LinSM_CurrentSchedule(channel, LinSM_CurrentScheduleIndex[channel]);
+        -:  417:									/* Resetowanie flagi błędu po obsłudze */
+        1:  418:									LinSM_ScheduleRequestError[channel] = FALSE;
+        -:  419:								}
+        -:  420:								/* Obsługa timera dla sieci [SWS_LinSM_00162]*/
+        3:  421:								if (LinSM_Timer[channel].timerActive) {
+        2:  422:									if (LinSM_Timer[channel].requestTimer > 0) {
+        2:  423:										LinSM_Timer[channel].requestTimer--;
+        -:  424:									}
+        2:  425:									if (LinSM_ScheduleConfirmed[channel] == TRUE) {
+        -:  426:										/* Potwierdzenie odebrane przed upływem czasu */
+        1:  427:										LinSM_Timer[channel].requestTimer = 0;  // Reset timera [SWS_LinSM_00154]
+        1:  428:										LinSM_Timer[channel].timerActive = FALSE; /* Potwierdzenie obsłużone */
+        1:  429:										LinSM_ScheduleConfirmed[channel] = FALSE;									
+        1:  430:									}else if (LinSM_Timer[channel].requestTimer == 0) {	/* Sprawdzenie timeoutu [SWS_LinSM_00101]*/
+        -:  431:										/* Timeout obsługi żądania - zgłoszenie do BswM */
+        1:  432:										BswM_LinSM_CurrentComMode(channel, COMM_NO_COMMUNICATION);
+        1:  433:										ComM_BusSM_ModeIndication(channel, COMM_FULL_COMMUNICATION); //[SWS_LinSM_00170]
+        1:  434:										BswM_LinSM_CurrentState(channel, LINSM_FULL_COM);
+        1:  435:										BswM_LinSM_CurrentSchedule(channel, LinSM_CurrentScheduleIndex[channel]); //[SWS_LinSM_00214]
+        1:  436:										Det_ReportRuntimeError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_MAIN_FUNCTION_API_ID, LINSM_E_CONFIRMATION_TIMEOUT);
+        1:  437:										LinSM_Timer[channel].timerActive = FALSE; /* Reset pending flag */
+        -:  438:									}
+        -:  439:								}
+        3:  440:								break;
+        2:  441:							case LINSM_GOTO_SLEEP: 								
+        -:  442:								/* Obsługa timera dla sieci */
+        2:  443:								if (LinSM_Timer[channel].timerActive) {
+        2:  444:									if (LinSM_Timer[channel].requestTimer > 0) {
+        1:  445:									LinSM_Timer[channel].requestTimer--;
+        -:  446:									}
+        2:  447:									if (LinSM_GotoSleepConfirmed[channel] == TRUE) {
+        -:  448:										/* Potwierdzenie odebrane przed upływem czasu */
+        1:  449:										LinSM_Timer[channel].requestTimer = 0;  // Reset timera [SWS_LinSM_00154]
+        1:  450:										LinSM_Timer[channel].timerActive = FALSE; /* Potwierdzenie obsłużone */
+        1:  451:										LinSM_GotoSleepConfirmed[channel] = FALSE;
+        1:  452:										LinSM_Mode = LINSM_NO_COM;
+        1:  453:										LinSM_SubState = LINSM_RUN_COMMUNICATION;										
+        1:  454:									}else if (LinSM_Timer[channel].requestTimer == 0) {	/* Sprawdzenie timeoutu [SWS_LinSM_00101]*/
+        -:  455:										/* Timeout obsługi żądania - zgłoszenie do BswM */
+        1:  456:										BswM_LinSM_CurrentComMode(channel, COMM_FULL_COMMUNICATION);
+        1:  457:										Det_ReportRuntimeError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_MAIN_FUNCTION_API_ID, LINSM_E_CONFIRMATION_TIMEOUT);
+        1:  458:										LinSM_Timer[channel].timerActive = FALSE; /* Reset pending flag */
+        1:  459:										LinSM_SubState = LINSM_RUN_COMMUNICATION;
+        -:  460:									}
+        -:  461:								}
+        -:  462:							default:
+        2:  463:								break;
+        -:  464:						}
+        -:  465:					default:
+        5:  466:						break;
+        -:  467:				}
+        -:  468:			default:
+       10:  469:				break;
+        -:  470:		}
+        -:  471:
+       11:  472:	}	
+        -:  473:/**
+        -:  474:  @brief 8.5.1 LinSM_ScheduleRequestConfirmation
+        -:  475:
+        -:  476:  Funkcja zwrotna wywoływana przez LinIf, gdy nowa tabela harmonogramu jest aktywna
+        -:  477:  Element projektu: 
+        -:  478:*/
+        -:  479:
+    #####:  480:void LinSM_ScheduleRequestConfirmation(NetworkHandleType channel, const LinIf_SchHandleType *schedule) {
+        -:  481:    /* Sprawdzenie, czy moduł LinSM jest zainicjalizowany */
+    #####:  482:    if (LinSM_MainState == LINSM_UNINIT) {
+        -:  483:        /* Zgłoszenie błędu: moduł LinSM nie został zainicjalizowany */
+    #####:  484:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_SCHEDULEREQUESTCONFIRMATION_API_ID, LINSM_E_UNINIT);
+    #####:  485:        return;
+        -:  486:    }
+        -:  487:
+        -:  488:    /* Sprawdzenie poprawności identyfikatora sieci */
+    #####:  489:    if (channel >= LINSM_MAX_CHANNELS) {
+        -:  490:        /* Zgłoszenie błędu: nieistniejąca sieć */
+    #####:  491:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_SCHEDULEREQUESTCONFIRMATION_API_ID, LINSM_E_NONEXISTENT_NETWORK);
+    #####:  492:        return;
+        -:  493:    }
+        -:  494:
+        -:  495:    /* Sprawdzenie wskaźnika na tabelę harmonogramu */
+    #####:  496:    if (schedule == NULL) {
+        -:  497:        /* Zgłoszenie błędu: nieprawidłowy wskaźnik */
+    #####:  498:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_SCHEDULEREQUESTCONFIRMATION_API_ID, LINSM_E_PARAM_POINTER);
+    #####:  499:        return;
+        -:  500:    }
+        -:  501:
+        -:  502:    /* Aktualizacja bieżącego harmonogramu */
+    #####:  503:    LinSM_CurrentScheduleIndex[channel] = *schedule;
+        -:  504:	
+        -:  505:	 /* Ustawienie flagi potwierdzenia harmonogramu */
+    #####:  506:    LinSM_ScheduleConfirmed[channel] = TRUE;
+        -:  507:
+        -:  508:    /* Powiadomienie BswM o aktywnej tabeli harmonogramu */
+    #####:  509:    BswM_LinSM_CurrentSchedule(channel, *schedule);
+        -:  510:}
+        -:  511:/**
+        -:  512:  @brief  8.5.3 LinSM_GotoSleepConfirmation
+        -:  513:
+        -:  514:  Funkcja zwrotna wywoływana przez LinIf po wysłaniu polecenia goto sleep
+        -:  515:  Element projektu: 
+        -:  516:*/
+        -:  517:
+    #####:  518:void LinSM_GotoSleepConfirmation(NetworkHandleType channel, boolean success) {
+        -:  519:    /* Sprawdzenie, czy moduł LinSM jest zainicjalizowany */
+    #####:  520:    if (LinSM_MainState == LINSM_UNINIT) {
+        -:  521:        /* Zgłoszenie błędu: moduł LinSM nie został zainicjalizowany */
+    #####:  522:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_GOTOSLEEPCONFIRMATION_API_ID, LINSM_E_UNINIT);
+    #####:  523:        return;
+        -:  524:    }
+        -:  525:
+        -:  526:    /* Sprawdzenie poprawności identyfikatora sieci */
+    #####:  527:    if (channel >= LINSM_MAX_CHANNELS) {
+        -:  528:        /* Zgłoszenie błędu: nieistniejąca sieć */
+    #####:  529:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_GOTOSLEEPCONFIRMATION_API_ID, LINSM_E_NONEXISTENT_NETWORK);
+    #####:  530:        return;
+        -:  531:    }
+        -:  532:
+        -:  533:    /* Obsługa sukcesu lub niepowodzenia */
+    #####:  534:    if (success == TRUE && LinSM_Mode == LINSM_FULL_COM && LinSM_SubState == LINSM_GOTO_SLEEP) {
+        -:  535:
+        -:  536:        /* Powiadomienie ComM o stanie NO_COMMUNICATION */
+    #####:  537:        ComM_BusSM_ModeIndication(channel, COMM_NO_COMMUNICATION);
+        -:  538:
+        -:  539:        /* Powiadomienie BswM o stanie NO_COM */
+    #####:  540:        BswM_LinSM_CurrentState(channel, LINSM_NO_COM);
+        -:  541:		
+        -:  542:		/* Ustawienie flagi potwierdzenia harmonogramu */
+    #####:  543:		LinSM_GotoSleepConfirmed[channel] = TRUE;
+        -:  544:    } else {
+        -:  545:        /* Operacja nie powiodła się: pozostanie w obecnym stanie */
+        -:  546:        /* Powiadomienie modułów o braku zmiany */
+    #####:  547:        if (LinSM_Mode == LINSM_FULL_COM) {
+    #####:  548:            ComM_BusSM_ModeIndication(channel, COMM_FULL_COMMUNICATION); //[SWS_LinSM_00170]
+    #####:  549:            BswM_LinSM_CurrentState(channel, LINSM_FULL_COM);
+    #####:  550:        } else if (LinSM_Mode == LINSM_NO_COM) {
+    #####:  551:            ComM_BusSM_ModeIndication(channel, COMM_NO_COMMUNICATION); //[SWS_LinSM_00170]
+    #####:  552:            BswM_LinSM_CurrentState(channel, LINSM_NO_COM);
+        -:  553:        }
+        -:  554:    }
+        -:  555:}
+        -:  556:/**
+        -:  557:  @brief 8.5.4 LinSM_WakeupConfirmation
+        -:  558:
+        -:  559:  Funkcja zwrotna wywoływana przez LinIf po wysłaniu sygnału wakeup
+        -:  560:  Element projektu: 
+        -:  561:*/
+    #####:  562:void LinSM_WakeupConfirmation(NetworkHandleType channel, boolean success) {
+        -:  563:    /* Sprawdzenie, czy moduł LinSM jest zainicjalizowany */
+    #####:  564:    if (LinSM_MainState == LINSM_UNINIT) {
+        -:  565:        /* Zgłoszenie błędu: moduł LinSM nie został zainicjalizowany */
+    #####:  566:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_WAKEUPCONFIRMATION_API_ID, LINSM_E_UNINIT);
+    #####:  567:        return;
+        -:  568:    }
+        -:  569:
+        -:  570:    /* Sprawdzenie poprawności identyfikatora sieci */
+    #####:  571:    if (channel >= LINSM_MAX_CHANNELS) {
+        -:  572:        /* Zgłoszenie błędu: nieistniejąca sieć */
+    #####:  573:        Det_ReportError(MODULE_ID_LINSM, INSTANCE_ID, LINSM_WAKEUPCONFIRMATION_API_ID, LINSM_E_NONEXISTENT_NETWORK);
+    #####:  574:        return;
+        -:  575:    }
+        -:  576:
+        -:  577:    /* Obsługa sukcesu lub niepowodzenia */
+    #####:  578:    if (success == TRUE && LinSM_Mode == LINSM_NO_COM && LinSM_MainState == LINSM_INIT) {
+        -:  579:        /* Powiadomienie ComM o stanie FULL_COMMUNICATION */
+    #####:  580:        ComM_BusSM_ModeIndication(channel, COMM_FULL_COMMUNICATION);
+        -:  581:
+        -:  582:        /* Powiadomienie BswM o stanie FULL_COM */
+    #####:  583:        BswM_LinSM_CurrentState(channel, LINSM_FULL_COM);
+        -:  584:		
+        -:  585:		 /* Ustawienie flagi potwierdzenia harmonogramu */
+    #####:  586:		LinSM_WakeupConfirmed[channel] = TRUE;
+        -:  587:		
+        -:  588:    } else {
+        -:  589:        /* Operacja nie powiodła się: pozostanie w obecnym stanie */
+        -:  590:        /* Powiadomienie modułów o braku zmiany */
+    #####:  591:        if (LinSM_Mode == LINSM_NO_COM) {
+    #####:  592:            ComM_BusSM_ModeIndication(channel, COMM_NO_COMMUNICATION); //[SWS_LinSM_00170]
+    #####:  593:            BswM_LinSM_CurrentState(channel, LINSM_NO_COM);
+    #####:  594:        } else if (LinSM_Mode == LINSM_FULL_COM) {
+    #####:  595:            ComM_BusSM_ModeIndication(channel, COMM_FULL_COMMUNICATION); //[SWS_LinSM_00170]
+    #####:  596:            BswM_LinSM_CurrentState(channel, LINSM_FULL_COM);
+        -:  597:        }
+        -:  598:    }
+        -:  599:}
